@@ -1,0 +1,451 @@
+{
+  "data":
+  {
+    "categories":
+    {
+      "total_count": 7,
+      "items":
+      [
+        {
+          "name": "Apparel",
+          "url": "apparel",
+          "id": "55",
+          "children":
+          [
+            {
+              "name": "Shirts",
+              "url": "apparel/shirts",
+              "id": "66",
+              "properties":
+              [
+                {
+                  "propname": "Display",
+                  "propvalue": "yes"
+                }
+              ],
+              "children":
+              []
+            },
+            {
+              "name": "Outerwear",
+              "url": "apparel/outerwear",
+              "id": "67",
+              "properties":
+              [
+                {
+                  "propname": "Display",
+                  "propvalue": "yes"
+                }
+              ],
+              "children":
+              []
+            },
+            {
+              "name": "Hats",
+              "url": "apparel/hats",
+              "id": "68",
+              "properties":
+              [
+                {
+                  "propname": "Display",
+                  "propvalue": "yes"
+                }
+              ],
+              "children":
+              []
+            },
+            {
+              "name": "Accessories",
+              "url": "apparel/accessories",
+              "id": "69",
+              "properties":
+              [
+                {
+                  "propname": "Display",
+                  "propvalue": "yes"
+                }
+              ],
+              "children":
+              []
+            },
+            {
+              "name": "Youth",
+              "url": "apparel/youth",
+              "id": "70",
+              "properties":
+              [
+                {
+                  "propname": "Display",
+                  "propvalue": "yes"
+                }
+              ],
+              "children":
+              []
+            },
+            {
+              "name": "Employee networks",
+              "url": "apparel/employee-networks",
+              "id": "63",
+              "properties":
+              [
+                {
+                  "propname": "Display",
+                  "propvalue": "yes"
+                }
+              ],
+              "children":
+              []
+            },
+            {
+              "name": "Event Staff Apparel",
+              "url": "apparel/event-staff-apparel",
+              "id": "60",
+              "properties":
+              [
+                {
+                  "propname": "Display",
+                  "propvalue": "yes"
+                }
+              ],
+              "children":
+              []
+            }
+          ]
+        },
+        {
+          "name": "Office",
+          "url": "office",
+          "id": "54",
+          "children":
+          [
+            {
+              "name": "Tech",
+              "url": "office/tech",
+              "id": "73",
+              "properties":
+              [
+                {
+                  "propname": "Display",
+                  "propvalue": "yes"
+                }
+              ],
+              "children":
+              []
+            },
+            {
+              "name": "Paper",
+              "url": "office/paper",
+              "id": "74",
+              "properties":
+              [
+                {
+                  "propname": "Display",
+                  "propvalue": "yes"
+                }
+              ],
+              "children":
+              []
+            },
+            {
+              "name": "Pens",
+              "url": "office/pens",
+              "id": "75",
+              "properties":
+              [
+                {
+                  "propname": "Display",
+                  "propvalue": "yes"
+                }
+              ],
+              "children":
+              []
+            },
+            {
+              "name": "Pins & stickers",
+              "url": "office/pins-stickers",
+              "id": "58",
+              "properties":
+              [
+                {
+                  "propname": "Display",
+                  "propvalue": "yes"
+                }
+              ],
+              "children":
+              []
+            },
+            {
+              "name": "Office accessories",
+              "url": "office/office-accessories",
+              "id": "76",
+              "properties":
+              [
+                {
+                  "propname": "Display",
+                  "propvalue": "yes"
+                }
+              ],
+              "children":
+              []
+            }
+          ]
+        },
+        {
+          "name": "Lifestyle",
+          "url": "lifestyle",
+          "id": "53",
+          "properties":
+          [
+            {
+              "propname": "Display",
+              "propvalue": "yes"
+            }
+          ],
+          "children":
+          [
+            {
+              "name": "Drinkware",
+              "url": "lifestyle/drinkware",
+              "id": "77",
+              "properties":
+              [
+                {
+                  "propname": "Display",
+                  "propvalue": "yes"
+                }
+              ],
+              "children":
+              []
+            },
+            {
+              "name": "At home",
+              "url": "lifestyle/at-home",
+              "id": "78",
+              "properties":
+              [
+                {
+                  "propname": "Display",
+                  "propvalue": "yes"
+                }
+              ],
+              "children":
+              []
+            },
+            {
+              "name": "Fun & games",
+              "url": "lifestyle/fun-games",
+              "id": "79",
+              "properties":
+              [
+                {
+                  "propname": "Display",
+                  "propvalue": "yes"
+                }
+              ],
+              "children":
+              []
+            },
+            {
+              "name": "Pillows",
+              "url": "lifestyle/pillows",
+              "id": "80",
+              "properties":
+              [
+                {
+                  "propname": "Display",
+                  "propvalue": "yes"
+                }
+              ],
+              "children":
+              []
+            },
+            {
+              "name": "Travel",
+              "url": "lifestyle/travel",
+              "id": "81",
+              "properties":
+              [
+                {
+                  "propname": "Display",
+                  "propvalue": "yes"
+                }
+              ],
+              "children":
+              []
+            }
+          ]
+        },
+        {
+          "name": "Bags",
+          "url": "bags",
+          "id": "57",
+          "properties":
+          [
+            {
+              "propname": "Display",
+              "propvalue": "yes"
+            }
+          ],
+          "children":
+          [
+            {
+              "name": "Backpacks",
+              "url": "bags/backpacks",
+              "id": "61",
+              "properties":
+              [
+                {
+                  "propname": "Display",
+                  "propvalue": "yes"
+                }
+              ],
+              "children":
+              []
+            },
+            {
+              "name": "Specialty",
+              "url": "bags/specialty",
+              "id": "83",
+              "properties":
+              [
+                {
+                  "propname": "Display",
+                  "propvalue": "yes"
+                }
+              ],
+              "children":
+              []
+            }
+          ]
+        },
+        {
+          "name": "Collections",
+          "url": "collections",
+          "id": "52",
+          "properties":
+          [
+            {
+              "propname": "Display",
+              "propvalue": "yes"
+            }
+          ],
+          "children":
+          [
+            {
+              "name": "Adobe MAX",
+              "url": "collections/adobe-max",
+              "id": "84",
+              "properties":
+              [
+                {
+                  "propname": "Display",
+                  "propvalue": "yes"
+                }
+              ],
+              "children":
+              []
+            },
+            {
+              "name": "Artist collaborations",
+              "url": "collections/artist-collaborations",
+              "id": "85",
+              "properties":
+              [
+                {
+                  "propname": "Display",
+                  "propvalue": "yes"
+                }
+              ],
+              "children":
+              []
+            },
+            {
+              "name": "Product branded gear",
+              "url": "collections/product-branded-gear",
+              "id": "86",
+              "properties":
+              [
+                {
+                  "propname": "Display",
+                  "propvalue": "yes"
+                }
+              ],
+              "children":
+              []
+            },
+            {
+              "name": "Gifts",
+              "url": "collections/gifts",
+              "id": "59",
+              "properties":
+              [
+                {
+                  "propname": "Display",
+                  "propvalue": "yes"
+                }
+              ],
+              "children":
+              []
+            },
+            {
+              "name": "Entertaining",
+              "url": "collections/entertaining",
+              "id": "87",
+              "properties":
+              [
+                {
+                  "propname": "Display",
+                  "propvalue": "yes"
+                }
+              ],
+              "children":
+              []
+            },
+            {
+              "name": "Employee networks collections",
+              "url": "collections/employee-networks",
+              "id": "88",
+              "properties":
+              [
+                {
+                  "propname": "Display",
+                  "propvalue": "yes"
+                }
+              ],
+              "children":
+              []
+            },
+            {
+              "name": "Event Staff Apparel",
+              "url": "apparel/event-staff-apparel",
+              "id": "89",
+              "properties":
+              [
+                {
+                  "propname": "Display",
+                  "propvalue": "yes"
+                }
+              ],
+              "children":
+              []
+            },
+            {
+              "name": "Event supplies",
+              "url": "collections/event-supplies",
+              "id": "90",
+              "properties":
+              [
+                {
+                  "propname": "Display",
+                  "propvalue": "yes"
+                }
+              ],
+              "children":
+              []
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
