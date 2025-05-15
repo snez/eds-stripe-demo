@@ -11,3 +11,4 @@ folders:
   /bags: /categories/default
   /collections: /categories/default
   /industrial-parts: /categories/default
+  /industrial-parts/valves: /products/default/HDP-1001
