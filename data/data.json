@@ -13,8 +13,8 @@
           "children":
           [
             {
-              "name": "Shirts",
-              "url": "apparel/shirts",
+              "name": "Valves",
+              "url": "industrial-parts/valves",
               "id": "6",
               "properties":
               [
