@@ -3,7 +3,7 @@
   {
     "categories":
     {
-      "total_count": 7,
+      "total_count": 8,
       "items":
       [
         {
@@ -442,6 +442,242 @@
               ],
               "children":
               []
+            }
+          ]
+        },
+        {
+          "name": "Industrial Parts",
+          "url": "industrial-parts",
+          "id": "3",
+          "properties":
+          [
+            {
+              "propname": "Display",
+              "propvalue": "yes"
+            }
+          ],
+          "children":
+          [
+            {
+              "name": "Pneumatic Components",
+              "url": "industrial-parts/pneumatic-components",
+              "id": "4",
+              "properties":
+              [
+                {
+                  "propname": "Display",
+                  "propvalue": "yes"
+                }
+              ],
+              "children": []
+            },
+            {
+              "name": "Electric Motors",
+              "url": "industrial-parts/electric-motors",
+              "id": "5",
+              "properties":
+              [
+                {
+                  "propname": "Display",
+                  "propvalue": "yes"
+                }
+              ],
+              "children": []
+            },
+            {
+              "name": "Valves",
+              "url": "industrial-parts/valves",
+              "id": "6",
+              "properties":
+              [
+                {
+                  "propname": "Display",
+                  "propvalue": "yes"
+                }
+              ],
+              "children": []
+            },
+            {
+              "name": "Safety Equipment",
+              "url": "industrial-parts/safety-equipment",
+              "id": "7",
+              "properties":
+              [
+                {
+                  "propname": "Display",
+                  "propvalue": "yes"
+                }
+              ],
+              "children": []
+            },
+            {
+              "name": "Power Transmission",
+              "url": "industrial-parts/power-transmission",
+              "id": "8",
+              "properties":
+              [
+                {
+                  "propname": "Display",
+                  "propvalue": "yes"
+                }
+              ],
+              "children": []
+            },
+            {
+              "name": "Hydraulic Components",
+              "url": "industrial-parts/hydraulic-components",
+              "id": "9",
+              "properties":
+              [
+                {
+                  "propname": "Display",
+                  "propvalue": "yes"
+                }
+              ],
+              "children": []
+            },
+            {
+              "name": "Control Systems",
+              "url": "industrial-parts/control-systems",
+              "id": "10",
+              "properties":
+              [
+                {
+                  "propname": "Display",
+                  "propvalue": "yes"
+                }
+              ],
+              "children": []
+            },
+            {
+              "name": "Mechanical Components",
+              "url": "industrial-parts/mechanical-components",
+              "id": "11",
+              "properties":
+              [
+                {
+                  "propname": "Display",
+                  "propvalue": "yes"
+                }
+              ],
+              "children": []
+            },
+            {
+              "name": "Electrical Components",
+              "url": "industrial-parts/electrical-components",
+              "id": "12",
+              "properties":
+              [
+                {
+                  "propname": "Display",
+                  "propvalue": "yes"
+                }
+              ],
+              "children": []
+            },
+            {
+              "name": "Sensors",
+              "url": "industrial-parts/sensors",
+              "id": "13",
+              "properties":
+              [
+                {
+                  "propname": "Display",
+                  "propvalue": "yes"
+                }
+              ],
+              "children": []
+            },
+            {
+              "name": "Motion Control",
+              "url": "industrial-parts/motion-control",
+              "id": "14",
+              "properties":
+              [
+                {
+                  "propname": "Display",
+                  "propvalue": "yes"
+                }
+              ],
+              "children": []
+            },
+            {
+              "name": "Material Handling",
+              "url": "industrial-parts/material-handling",
+              "id": "15",
+              "properties":
+              [
+                {
+                  "propname": "Display",
+                  "propvalue": "yes"
+                }
+              ],
+              "children": []
+            },
+            {
+              "name": "Networking",
+              "url": "industrial-parts/networking",
+              "id": "16",
+              "properties":
+              [
+                {
+                  "propname": "Display",
+                  "propvalue": "yes"
+                }
+              ],
+              "children": []
+            },
+            {
+              "name": "Robotic Components",
+              "url": "industrial-parts/robotic-components",
+              "id": "17",
+              "properties":
+              [
+                {
+                  "propname": "Display",
+                  "propvalue": "yes"
+                }
+              ],
+              "children": []
+            },
+            {
+              "name": "Filtration",
+              "url": "industrial-parts/filtration",
+              "id": "18",
+              "properties":
+              [
+                {
+                  "propname": "Display",
+                  "propvalue": "yes"
+                }
+              ],
+              "children": []
+            },
+            {
+              "name": "Heating Systems",
+              "url": "industrial-parts/heating-systems",
+              "id": "19",
+              "properties":
+              [
+                {
+                  "propname": "Display",
+                  "propvalue": "yes"
+                }
+              ],
+              "children": []
+            },
+            {
+              "name": "Automation",
+              "url": "industrial-parts/automation",
+              "id": "20",
+              "properties":
+              [
+                {
+                  "propname": "Display",
+                  "propvalue": "yes"
+                }
+              ],
+              "children": []
             }
           ]
         }
