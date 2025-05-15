@@ -10,5 +10,5 @@ folders:
   /lifestyle: /categories/default
   /bags: /categories/default
   /collections: /categories/default
-  /industrial-parts: /categories/default
   /industrial-parts/pneumatic-components: /products/pneumatic-components/HDP-1001
+  /industrial-parts: /categories/default
