@@ -80,6 +80,9 @@ import {
 } from '../../scripts/checkout.js';
 import { authPrivacyPolicyConsentSlot } from '../../scripts/constants.js';
 
+let checkoutData = null;
+let cartData = null;
+
 function createMetaTag(property, content, type) {
   if (!property || !type) {
     return;
@@ -111,6 +114,195 @@ function setMetaTags(dropin) {
   createMetaTag('og:description', dropin);
   createMetaTag('og:title', dropin);
   createMetaTag('og:url', window.location.href, 'property');
+}
+
+// Function to create a payment session with the OOPE payment gateway (Stripe)
+async function createPaymentIntent(endpoint, request) {
+  return (
+    await fetch(endpoint, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(request),
+    })
+  ).json();
+}
+
+// Function to start payment flow when an OOPE method is selected
+async function startPayment(cartData, checkoutData) {
+  // ✅ Locate the "oope_stripe" payment method
+  const stripePaymentMethod = checkoutData.availablePaymentMethods.find(
+    (method) => method.code === 'oope_stripe',
+  );
+
+  if (!stripePaymentMethod || !stripePaymentMethod.oope_payment_method_config) {
+    console.error('Stripe payment method configuration is missing.');
+    throw new Error('Stripe payment method is not available.');
+  }
+
+  // eslint-disable-next-line max-len
+  const paymentConfig = JSON.parse(stripePaymentMethod.oope_payment_method_config.backend_integration_url);
+
+  if (!paymentConfig.createPaymentIntentUrl) {
+    console.error('createPaymentIntent URL is missing in the configuration.');
+    throw new Error('Stripe payment configuration is invalid.');
+  }
+
+  const runtimeCreatePaymentIntentUrl = paymentConfig.createPaymentIntentUrl;
+  const cartId = cartData?.id;
+  const cartFullName = `${checkoutData?.billingAddress?.firstName || ''} ${checkoutData?.billingAddress?.lastName || ''}`.trim();
+
+  const requestBody = {
+    cartId,
+    cartFullName,
+  };
+
+  const beginCreatePaymentIntent = await createPaymentIntent(
+    runtimeCreatePaymentIntentUrl,
+    requestBody,
+  );
+
+  if (!beginCreatePaymentIntent || !beginCreatePaymentIntent.pi_id) {
+    alert('Payment error: Unable to create Stripe session.');
+    return { pi_id: null, payment_method: null, client_secret: null };
+  }
+  return {
+    pi_id: beginCreatePaymentIntent.pi_id,
+    payment_method: beginCreatePaymentIntent.payment_method,
+    client_secret: beginCreatePaymentIntent.client_secret,
+  };
+}
+
+function updateStripeBillingDetails() {
+  if (!window.stripe || !window.elements || !window.paymentElement) {
+    console.warn('Stripe Elements not initialized yet.');
+    return;
+  }
+
+  const billingAddress = checkoutData?.billingAddress || {};
+  const shippingAddress = checkoutData?.shippingAddress || {};
+  const isSameAsShipping = checkoutData?.isBillingSameAsShipping;
+
+  const selectedBillingAddress = isSameAsShipping ? shippingAddress : billingAddress;
+
+  // ✅ Correctly format billing details
+  const updatedBillingDetails = {
+    billingDetails: {
+      name: `${selectedBillingAddress?.firstName || ''} ${selectedBillingAddress?.lastName || ''}`.trim(),
+      email: checkoutData?.email || '',
+      phone: selectedBillingAddress?.telephone || '',
+      address: {
+        line1: selectedBillingAddress?.street?.[0] || '',
+        line2: selectedBillingAddress?.street?.[1] || '',
+        city: selectedBillingAddress?.city || '',
+        state: selectedBillingAddress?.region?.code || '',
+        country: selectedBillingAddress?.country?.code || '',
+        postal_code: selectedBillingAddress?.postcode || '',
+      },
+    },
+  };
+
+  // ✅ Use updatePaymentElement to apply the new billing details
+  window.paymentElement.update({
+    fields: {
+      billingDetails: 'auto', // Let Stripe collect billing details
+    },
+    defaultValues: updatedBillingDetails, // Pre-fill with the selected address
+  });
+
+  // Store for later use when confirming payment
+  window.updatedBillingDetails = updatedBillingDetails;
+}
+
+async function mountPaymentDropin(mountId) {
+  let stripePublishableKey;
+
+  try {
+    // 🔥 Retrieve Stripe config dynamically
+    const stripePaymentMethod = checkoutData.availablePaymentMethods.find(
+      (method) => method.code === 'oope_stripe',
+    );
+
+    if (!stripePaymentMethod || !stripePaymentMethod.oope_payment_method_config) {
+      console.error('Stripe payment method configuration is missing.');
+      throw new Error('Stripe payment method is not available.');
+    }
+    // 🔥 Parse the JSON config to get URLs
+    // eslint-disable-next-line max-len
+    const paymentConfig = JSON.parse(stripePaymentMethod.oope_payment_method_config.backend_integration_url);
+
+    if (!paymentConfig.getPublishableKeyUrl) {
+      console.error('getPublishableKeyUrl is missing in the configuration.');
+      throw new Error('Stripe public key configuration is invalid.');
+    }
+
+    const runtimeGetPublishableKeyUrl = paymentConfig.getPublishableKeyUrl;
+
+    // 🔥 Fetch the Stripe Public Key
+    const stripeKeys = await fetch(runtimeGetPublishableKeyUrl);
+
+    if (!stripeKeys.ok) {
+      throw new Error(`Failed to load Stripe key: ${stripeKeys.statusText}`);
+    }
+
+    const stripeData = await stripeKeys.json();
+    stripePublishableKey = stripeData.publishableKey;
+  } catch (error) {
+    console.error('Error fetching Stripe key:', error);
+    alert('Error loading payment settings. Please try again.');
+    return;
+  }
+
+  const stripe = Stripe(stripePublishableKey);
+  const cartTotal = Math.round(Number(cartData?.total?.includingTax?.value) * 100);
+  const cartCurrency = cartData?.total?.includingTax?.currency?.toLowerCase();
+
+  // 🔥 Dynamically set billing details from checkoutData
+  const billingAddress = checkoutData?.billingAddress || {};
+  const shippingAddress = checkoutData?.shippingAddress || {};
+  const isSameAsShipping = checkoutData?.isBillingSameAsShipping;
+
+  const selectedBillingAddress = isSameAsShipping ? shippingAddress : billingAddress;
+
+  // ✅ Construct billing details for Stripe
+  const billingDetails = {
+    name: `${selectedBillingAddress?.firstName || ''} ${selectedBillingAddress?.lastName || ''}`.trim(),
+    email: checkoutData?.email || '',
+    phone: selectedBillingAddress?.telephone || '',
+    address: {
+      line1: selectedBillingAddress?.street?.[0] || '',
+      line2: selectedBillingAddress?.street?.[1] || '',
+      city: selectedBillingAddress?.city || '',
+      state: selectedBillingAddress?.region?.code || '',
+      country: selectedBillingAddress?.country?.code || '',
+      postalCode: selectedBillingAddress?.postcode || '',
+    },
+  };
+
+  // Initialize Stripe elements with billing details
+  const elements = stripe.elements({
+    mode: 'payment',
+    amount: cartTotal,
+    currency: cartCurrency,
+    paymentMethodTypes: ['card', 'link'],
+    defaultValues: {
+      billingDetails,
+    },
+  });
+
+  const paymentElement = elements.create('payment');
+  paymentElement.mount(mountId);
+
+  // Track form completion status
+  paymentElement.on('change', (event) => {
+    window.isPaymentFormComplete = event.complete;
+  });
+
+  window.paymentElement = paymentElement;
+  window.stripe = stripe;
+  window.elements = elements;
+  events.on('checkout/updated', updateStripeBillingDetails);
 }
 
 export default async function decorate(block) {
@@ -325,6 +517,23 @@ export default async function decorate(block) {
               ctx.replaceHTML($content);
             },
           },
+          oope_stripe: {
+            render: (ctx) => {
+              const $content = document.createElement('div');
+              $content.id = 'stripe-payment-form'; // Stripe form container
+
+              // Ensure a child element exists for Stripe Elements
+              const $stripeContainer = document.createElement('div');
+              $stripeContainer.id = 'stripe-elements-container';
+
+              $content.appendChild($stripeContainer);
+              ctx.replaceHTML($content);
+
+              requestAnimationFrame(() => {
+                events.on('checkout/initialized', (data) => { checkoutData = data; mountPaymentDropin('#stripe-elements-container'); }, { eager: true });
+              });
+            },
+          },
           [PaymentMethodCode.SMART_BUTTONS]: {
             enabled: false,
           },
@@ -435,13 +644,79 @@ export default async function decorate(block) {
           success = billingFormRef.current.handleValidationSubmit(false);
         }
 
+        // Validate Stripe PaymentElement
+        if (success && window.paymentElement) {
+          if (!window.isPaymentFormComplete) {
+            alert('Please complete your payment details');
+            success = false;
+          }
+        }
+
         return success;
       },
       handlePlaceOrder: async ({ cartId, code }) => {
         await displayOverlaySpinner();
         try {
-          // Payment Services credit card
-          if (code === PaymentMethodCode.CREDIT_CARD) {
+          if (code === 'oope_stripe') {
+            if (!window.stripe || !window.elements) {
+              throw new Error('Stripe Elements not initialized.');
+            }
+
+            await window.elements.submit();
+
+            const createPaymentIntent = await startPayment(cartData, checkoutData);
+            if (!createPaymentIntent?.client_secret) {
+              throw new Error('Missing Stripe client_secret.');
+            }
+
+            const clientSecret = createPaymentIntent.client_secret;
+
+            const { error, paymentIntent } = await window.stripe.confirmPayment({
+              elements: window.elements,
+              redirect: 'if_required', // Avoid unnecessary redirects
+              clientSecret, // The client secret from backend
+              confirmParams: {
+                payment_method_data: {
+                  billing_details: window.updatedBillingDetails.billing_details,
+                },
+              },
+            });
+
+            if (error) {
+              throw new Error(`Stripe Payment failed: ${error.message}`);
+            }
+
+            // ✅ Set Payment Method in Adobe Commerce
+            const setPaymentMethodMutation = `
+        mutation SetPaymentMethod($cartId: String!, $clientSecret: String!) {
+          setPaymentMethodOnCart(input: {
+            cart_id: $cartId,
+            payment_method: {
+              code: "oope_stripe",
+              additional_data: [
+                { key: "client_secret", value: $clientSecret }
+              ]
+            }
+          }) {
+            cart { id }
+          }
+        }
+      `;
+
+            const paymentMethodResponse = await fetch(commerceCoreEndpoint, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                query: setPaymentMethodMutation,
+                variables: { cartId, clientSecret },
+              }),
+            }).then((res) => res.json());
+
+            if (!paymentMethodResponse.data) {
+              throw new Error('Failed to set payment method on cart.');
+            }
+          } else if (code === PaymentMethodCode.CREDIT_CARD) {
+            // ✅ Handle Credit Card Payment
             if (!creditCardFormRef.current) {
               console.error('Credit card form not rendered.');
               return;
@@ -902,7 +1177,10 @@ export default async function decorate(block) {
 
   events.on('authenticated', handleAuthenticated);
   events.on('cart/initialized', handleCartInitialized, { eager: true });
+  events.on('cart/initialized', (data) => { cartData = data; }, { eager: true });
   events.on('checkout/initialized', handleCheckoutInitialized, { eager: true });
+  events.on('checkout/initialized', (data) => { checkoutData = data; }, { eager: true });
   events.on('checkout/updated', handleCheckoutUpdated);
+  events.on('checkout/updated', (data) => { checkoutData = data; updateStripeBillingDetails(); });
   events.on('order/placed', handleOrderPlaced);
 }
