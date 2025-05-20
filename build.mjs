@@ -6,12 +6,12 @@ overrideGQLOperations([
   {
     npm: '@dropins/storefront-cart',
     skipFragments: ['DOWNLOADABLE_CART_ITEMS_FRAGMENT'],
-    operations: []
+    operations: [],
   },
   {
     npm: '@dropins/storefront-order',
     skipFragments: ['DOWNLOADABLE_ORDER_ITEMS_FRAGMENT'],
-    operations: []
+    operations: [],
   },
   {
     npm: '@dropins/storefront-checkout',
