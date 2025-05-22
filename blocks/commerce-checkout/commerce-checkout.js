@@ -3,7 +3,6 @@
 /* eslint-disable no-shadow */
 /* eslint-disable no-use-before-define */
 /* eslint-disable prefer-const */
-/* eslint-disable no-alert */
 /* eslint-disable no-console */
 /* global Stripe */
 
@@ -286,6 +285,35 @@ function updateStripeBillingDetails() {
   window.updatedBillingDetails = updatedBillingDetails;
 }
 
+// Helper to get current billing details even if they haven't been updated yet
+function getCurrentBillingDetails() {
+  // If we already have updated billing details, use them
+  if (window.updatedBillingDetails && window.updatedBillingDetails.billingDetails) {
+    return window.updatedBillingDetails.billingDetails;
+  }
+
+  // Otherwise, create billing details from current checkoutData
+  const billingAddress = checkoutData?.billingAddress || {};
+  const shippingAddress = checkoutData?.shippingAddress || {};
+  const isSameAsShipping = checkoutData?.isBillingSameAsShipping;
+
+  const selectedBillingAddress = isSameAsShipping ? shippingAddress : billingAddress;
+
+  return {
+    name: `${selectedBillingAddress?.firstName || ''} ${selectedBillingAddress?.lastName || ''}`.trim(),
+    email: checkoutData?.email || '',
+    phone: selectedBillingAddress?.telephone || '',
+    address: {
+      line1: selectedBillingAddress?.street?.[0] || '',
+      line2: selectedBillingAddress?.street?.[1] || '',
+      city: selectedBillingAddress?.city || '',
+      state: selectedBillingAddress?.region?.code || '',
+      country: selectedBillingAddress?.country?.code || '',
+      postal_code: selectedBillingAddress?.postcode || '',
+    },
+  };
+}
+
 async function mountPaymentDropin(mountId) {
   let stripePublishableKey;
 
@@ -388,6 +416,9 @@ async function mountPaymentDropin(mountId) {
     window.paymentElement = paymentElement;
     window.stripe = stripe;
     window.elements = elements;
+    // Update billing details on initial load
+    updateStripeBillingDetails();
+    // Set up event listener for future checkout updates
     events.on('checkout/updated', updateStripeBillingDetails);
   } catch (error) {
     console.error('Error initializing Stripe payment form:', error);
@@ -814,7 +845,7 @@ export default async function decorate(block) {
               clientSecret, // The client secret from backend
               confirmParams: {
                 payment_method_data: {
-                  billing_details: window.updatedBillingDetails.billing_details,
+                  billing_details: getCurrentBillingDetails(),
                 },
               },
             });
@@ -1327,7 +1358,13 @@ export default async function decorate(block) {
   events.on('cart/initialized', handleCartInitialized, { eager: true });
   events.on('cart/initialized', (data) => { cartData = data; }, { eager: true });
   events.on('checkout/initialized', handleCheckoutInitialized, { eager: true });
-  events.on('checkout/initialized', (data) => { checkoutData = data; }, { eager: true });
+  events.on('checkout/initialized', (data) => {
+    checkoutData = data;
+    // Update billing details if stripe payment is already initialized
+    if (window.paymentElement) {
+      updateStripeBillingDetails();
+    }
+  }, { eager: true });
   events.on('checkout/updated', handleCheckoutUpdated);
   events.on('checkout/updated', (data) => { checkoutData = data; updateStripeBillingDetails(); });
   events.on('order/placed', handleOrderPlaced);
