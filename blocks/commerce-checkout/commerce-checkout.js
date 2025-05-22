@@ -637,11 +637,6 @@ export default async function decorate(block) {
               const $stripeContainer = document.createElement('div');
               $stripeContainer.id = 'stripe-elements-container';
               $stripeContainer.classList.add('stripe-elements-loading');
-              $stripeContainer.innerHTML = `
-                <div class="stripe-loading-indicator">
-                  <div class="stripe-loading-spinner"></div>
-                </div>
-              `;
 
               $content.appendChild($stripeContainer);
               ctx.replaceHTML($content);

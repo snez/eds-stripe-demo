@@ -1,39 +1,4 @@
 /* Stripe payment form styles */
-.stripe-elements-loading {
-  min-height: 120px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 15px;
-  margin: 15px 0;
-}
-
-.stripe-loading-indicator {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-}
-
-/* Loading spinner animation */
-.stripe-loading-spinner {
-  width: 40px;
-  height: 40px;
-  border: 3px solid rgba(0, 0, 0, 0.1);
-  border-radius: 50%;
-  border-top-color: #1473e6;
-  animation: stripe-spinner 1s ease-in-out infinite;
-}
-
-@keyframes stripe-spinner {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
-}
-
 .stripe-error {
   color: #e53935;
   font-size: 14px;
