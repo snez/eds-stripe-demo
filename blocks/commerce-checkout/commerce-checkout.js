@@ -784,14 +784,14 @@ export default async function decorate(block) {
           if (code === 'oope_stripe') {
             clearStripeError(); // Clear any previous errors
 
-            if (!window.stripe || !window.elements) {
+            if (!stripe || !elements) {
               await removeOverlaySpinner();
               displayStripeError('Stripe payment is not properly initialized. Please refresh and try again.');
               return;
             }
 
             try {
-              await window.elements.submit();
+              await elements.submit();
             } catch (elemSubmitError) {
               await removeOverlaySpinner();
               displayStripeError('Error validating payment form. Please check your payment details.');
@@ -807,8 +807,8 @@ export default async function decorate(block) {
 
             const clientSecret = createPaymentIntent.client_secret;
 
-            const { error, paymentIntent } = await window.stripe.confirmPayment({
-              elements: window.elements,
+            const { error, paymentIntent } = await stripe.confirmPayment({
+              elements: elements,
               redirect: 'if_required', // Avoid unnecessary redirects
               clientSecret, // The client secret from backend
               confirmParams: {
