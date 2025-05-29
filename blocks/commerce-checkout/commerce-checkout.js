@@ -152,6 +152,10 @@ const loadStripeJs = () => {
 
 let checkoutData = null;
 let cartData = null;
+let elements = null;
+let paymentElement = null;
+let stripe = null;
+let isPaymentFormComplete = false;
 
 function createMetaTag(property, content, type) {
   if (!property || !type) {
@@ -245,71 +249,51 @@ async function startPayment(cartData, checkoutData) {
 }
 
 function updateStripeBillingDetails() {
-  if (!window.stripe || !window.elements || !window.paymentElement) {
-    console.warn('Stripe Elements not initialized yet.');
-    return;
+  if (paymentElement && paymentElement.update) {
+    paymentElement.update(getPaymentElementOptions());
   }
-
-  const billingAddress = checkoutData?.billingAddress || {};
-  const shippingAddress = checkoutData?.shippingAddress || {};
-  const isSameAsShipping = checkoutData?.isBillingSameAsShipping;
-
-  const selectedBillingAddress = isSameAsShipping ? shippingAddress : billingAddress;
-
-  // ✅ Correctly format billing details
-  const updatedBillingDetails = {
-    billingDetails: {
-      name: `${selectedBillingAddress?.firstName || ''} ${selectedBillingAddress?.lastName || ''}`.trim(),
-      email: checkoutData?.email || '',
-      phone: selectedBillingAddress?.telephone || '',
-      address: {
-        line1: selectedBillingAddress?.street?.[0] || '',
-        line2: selectedBillingAddress?.street?.[1] || '',
-        city: selectedBillingAddress?.city || '',
-        state: selectedBillingAddress?.region?.code || '',
-        country: selectedBillingAddress?.country?.code || '',
-        postal_code: selectedBillingAddress?.postcode || '',
-      },
-    },
-  };
-
-  // ✅ Use updatePaymentElement to apply the new billing details
-  window.paymentElement.update({
-    fields: {
-      billingDetails: 'auto', // Let Stripe collect billing details
-    },
-    defaultValues: updatedBillingDetails, // Pre-fill with the selected address
-  });
-
-  // Store for later use when confirming payment
-  window.updatedBillingDetails = updatedBillingDetails;
 }
 
-// Helper to get current billing details even if they haven't been updated yet
-function getCurrentBillingDetails() {
-  // If we already have updated billing details, use them
-  if (window.updatedBillingDetails && window.updatedBillingDetails.billingDetails) {
-    return window.updatedBillingDetails.billingDetails;
-  }
-
-  // Otherwise, create billing details from current checkoutData
-  const billingAddress = checkoutData?.billingAddress || {};
-  const shippingAddress = checkoutData?.shippingAddress || {};
-  const isSameAsShipping = checkoutData?.isBillingSameAsShipping;
-
-  const selectedBillingAddress = isSameAsShipping ? shippingAddress : billingAddress;
+function getPaymentElementOptions() {
+  let currentBillingDetails = getCurrentBillingDetails();
 
   return {
-    name: `${selectedBillingAddress?.firstName || ''} ${selectedBillingAddress?.lastName || ''}`.trim(),
+    layout: 'accordion',
+    fields: {
+      billingDetails: {
+        name: 'never',
+        email: 'never',
+        phone: (currentBillingDetails.phone ? 'never' : 'auto'),
+        address: {
+          line1: (currentBillingDetails.address.line1 ? 'never' : 'auto'),
+          line2: (currentBillingDetails.address.line2 ? 'never' : 'auto'),
+          city: (currentBillingDetails.address.city ? 'never' : 'auto'),
+          state: (currentBillingDetails.address.state ? 'never' : 'auto'),
+          country: (currentBillingDetails.address.country ? 'never' : 'auto'),
+          postalCode: (currentBillingDetails.address.postalCode ? 'never' : 'auto'),
+        },
+      },
+    },
+    defaultValues: {
+      billingDetails: getCurrentBillingDetails(),
+    },
+  };
+}
+
+function getCurrentBillingDetails() {
+  const billingAddress = checkoutData?.billingAddress || {};
+
+  return {
+    name: `${billingAddress?.firstName || ''} ${billingAddress?.lastName || ''}`.trim(),
     email: checkoutData?.email || '',
-    phone: selectedBillingAddress?.telephone || '',
+    phone: billingAddress?.telephone || '',
     address: {
-      line1: selectedBillingAddress?.street?.[0] || '',
-      line2: selectedBillingAddress?.street?.[1] || '',
-      city: selectedBillingAddress?.city || '',
-      state: selectedBillingAddress?.region?.code || '',
-      country: selectedBillingAddress?.country?.code || '',
-      postal_code: selectedBillingAddress?.postcode || '',
+      line1: billingAddress?.street?.[0] || '',
+      line2: billingAddress?.street?.[1] || '',
+      city: billingAddress?.city || '',
+      state: billingAddress?.region?.code || '',
+      country: billingAddress?.country?.value || '',
+      postalCode: billingAddress?.postCode || '',
     },
   };
 }
@@ -359,7 +343,7 @@ async function mountPaymentDropin(mountId) {
   }
 
   try {
-    const stripe = Stripe(stripePublishableKey);
+    stripe = Stripe(stripePublishableKey);
     const cartTotal = Math.round(Number(cartData?.total?.includingTax?.value) * 100);
     const cartCurrency = cartData?.total?.includingTax?.currency?.toLowerCase();
 
@@ -371,22 +355,10 @@ async function mountPaymentDropin(mountId) {
     const selectedBillingAddress = isSameAsShipping ? shippingAddress : billingAddress;
 
     // ✅ Construct billing details for Stripe
-    const billingDetails = {
-      name: `${selectedBillingAddress?.firstName || ''} ${selectedBillingAddress?.lastName || ''}`.trim(),
-      email: checkoutData?.email || '',
-      phone: selectedBillingAddress?.telephone || '',
-      address: {
-        line1: selectedBillingAddress?.street?.[0] || '',
-        line2: selectedBillingAddress?.street?.[1] || '',
-        city: selectedBillingAddress?.city || '',
-        state: selectedBillingAddress?.region?.code || '',
-        country: selectedBillingAddress?.country?.code || '',
-        postalCode: selectedBillingAddress?.postcode || '',
-      },
-    };
+    const billingDetails = getCurrentBillingDetails;
 
     // Initialize Stripe elements with billing details
-    const elements = stripe.elements({
+    elements = stripe.elements({
       mode: 'payment',
       amount: cartTotal,
       currency: cartCurrency,
@@ -405,19 +377,15 @@ async function mountPaymentDropin(mountId) {
       container.innerHTML = '';
     }
 
-    const paymentElement = elements.create('payment');
+    const options = getPaymentElementOptions();
+    paymentElement = elements.create('payment', options);
     paymentElement.mount(mountId);
 
     // Track form completion status
     paymentElement.on('change', (event) => {
-      window.isPaymentFormComplete = event.complete;
+      isPaymentFormComplete = event.complete;
     });
 
-    window.paymentElement = paymentElement;
-    window.stripe = stripe;
-    window.elements = elements;
-    // Update billing details on initial load
-    updateStripeBillingDetails();
     // Set up event listener for future checkout updates
     events.on('checkout/updated', updateStripeBillingDetails);
   } catch (error) {
@@ -799,8 +767,8 @@ export default async function decorate(block) {
         }
 
         // Validate Stripe PaymentElement
-        if (success && window.paymentElement) {
-          if (!window.isPaymentFormComplete) {
+        if (success && paymentElement) {
+          if (!isPaymentFormComplete) {
             displayStripeError('Please complete your payment details');
             success = false;
           } else {
