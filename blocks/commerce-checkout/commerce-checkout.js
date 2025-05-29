@@ -270,7 +270,7 @@ function getPaymentElementOptions() {
           city: (currentBillingDetails.address.city ? 'never' : 'auto'),
           state: (currentBillingDetails.address.state ? 'never' : 'auto'),
           country: (currentBillingDetails.address.country ? 'never' : 'auto'),
-          postalCode: (currentBillingDetails.address.postalCode ? 'never' : 'auto'),
+          postalCode: (currentBillingDetails.address.postal_code ? 'never' : 'auto'),
         },
       },
     },
@@ -293,7 +293,7 @@ function getCurrentBillingDetails() {
       city: billingAddress?.city || '',
       state: billingAddress?.region?.code || '',
       country: billingAddress?.country?.value || '',
-      postalCode: billingAddress?.postCode || '',
+      postal_code: billingAddress?.postCode || '',
     },
   };
 }
@@ -808,7 +808,7 @@ export default async function decorate(block) {
             const clientSecret = createPaymentIntent.client_secret;
 
             const { error, paymentIntent } = await stripe.confirmPayment({
-              elements: elements,
+              elements,
               redirect: 'if_required', // Avoid unnecessary redirects
               clientSecret, // The client secret from backend
               confirmParams: {
