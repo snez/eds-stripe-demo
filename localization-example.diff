@@ -1,0 +1,138 @@
+diff --git a/blocks/stripe-payment/stripe-payment.js b/blocks/stripe-payment/stripe-payment.js
+index ec99c49..06ce588 100644
+--- a/blocks/stripe-payment/stripe-payment.js
++++ b/blocks/stripe-payment/stripe-payment.js
+@@ -16,7 +16,7 @@ import * as orderApi from '@dropins/storefront-order/api.js';
+ import { PaymentMethodCode } from '@dropins/storefront-payment-services/api.js';
+ 
+ import { getConfigValue } from '../../scripts/configs.js';
+-import { loadCSS } from '../../scripts/aem.js';
++import { loadCSS, fetchPlaceholders } from '../../scripts/aem.js';
+ 
+ /**
+  * Stripe Payment Drop-in
+@@ -71,14 +71,29 @@ const loadStripeJs = () => {
+   return stripeLoadingPromise;
+ };
+ 
++// Helper to get localized error message
++async function getLocalizedMessage(defaultMessage) {
++  try {
++    const placeholders = await fetchPlaceholders();
++    // Try to get localized message from placeholders
++    return placeholders?.Custom?.StripePayment?.genericError || defaultMessage;
++  } catch (e) {
++    console.warn('Failed to load localized message:', e);
++    return defaultMessage;
++  }
++}
++
+ // Helper to display Stripe payment errors
+-function displayStripeError(message, containerId = 'stripe-elements-container') {
++async function displayStripeError(message, containerId = 'stripe-elements-container') {
+   const container = document.querySelector(`#${containerId}`);
+   if (!container) {
+     console.error('Error container not found:', containerId);
+     return;
+   }
+ 
++  // Get localized message
++  const localizedMessage = await getLocalizedMessage(message);
++
+   // Create error container if it doesn't exist
+   let errorContainer = container.querySelector('.stripe-error');
+   if (!errorContainer) {
+@@ -87,7 +102,7 @@ function displayStripeError(message, containerId = 'stripe-elements-container')
+     container.appendChild(errorContainer);
+   }
+ 
+-  errorContainer.textContent = message;
++  errorContainer.textContent = localizedMessage;
+ 
+   // Scroll to error for visibility
+   errorContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+@@ -156,7 +171,7 @@ async function startPayment(cartDataParam, checkoutDataParam) {
+   );
+ 
+   if (!beginCreatePaymentIntent || !beginCreatePaymentIntent.pi_id) {
+-    displayStripeError('Payment error: Unable to create Stripe session.');
++    await displayStripeError('Payment error: Unable to create Stripe session.');
+     return { pi_id: null, payment_method: null, client_secret: null };
+   }
+   return {
+@@ -256,7 +271,7 @@ async function mountPaymentDropin(mountId) {
+     console.error('Error fetching Stripe key:', error);
+     // Display the error using our helper function
+     const mountIdWithoutHash = mountId.startsWith('#') ? mountId.substring(1) : mountId;
+-    displayStripeError('Unable to load payment form. Please refresh and try again.', mountIdWithoutHash);
++    await displayStripeError('Unable to load payment form. Please refresh and try again.', mountIdWithoutHash);
+     return;
+   }
+ 
+@@ -310,7 +325,7 @@ async function mountPaymentDropin(mountId) {
+     console.error('Error initializing Stripe payment form:', error);
+     // Display the error using our helper function
+     const mountIdWithoutHash = mountId.startsWith('#') ? mountId.substring(1) : mountId;
+-    displayStripeError('Unable to initialize payment form. Please refresh and try again.', mountIdWithoutHash);
++    await displayStripeError('Unable to initialize payment form. Please refresh and try again.', mountIdWithoutHash);
+   }
+ }
+ 
+@@ -320,12 +335,12 @@ async function handleStripePayment(cartId) {
+   clearStripeError();
+ 
+   if (!validateStripePayment()) {
+-    displayStripeError('Please complete your payment details');
++    await displayStripeError('Please complete your payment details');
+     return false;
+   }
+ 
+   if (!stripe || !elements) {
+-    displayStripeError('Stripe payment is not properly initialized. Please refresh and try again.');
++    await displayStripeError('Stripe payment is not properly initialized. Please refresh and try again.');
+     return false;
+   }
+ 
+@@ -333,13 +348,13 @@ async function handleStripePayment(cartId) {
+     await elements.submit();
+   } catch (elemSubmitError) {
+     const errorMessage = elemSubmitError?.message || 'Unknown error submitting payment form';
+-    displayStripeError(errorMessage);
++    await displayStripeError(errorMessage);
+     return false;
+   }
+ 
+   const paymentIntentData = await startPayment(cartData, checkoutData);
+   if (!paymentIntentData?.client_secret) {
+-    displayStripeError('Unable to create payment session. Please try again.');
++    await displayStripeError('Unable to create payment session. Please try again.');
+     return false;
+   }
+ 
+@@ -357,7 +372,7 @@ async function handleStripePayment(cartId) {
+   });
+ 
+   if (error) {
+-    displayStripeError(`Payment failed: ${error.message}`);
++    await displayStripeError(error.message);
+     return false;
+   }
+ 
+@@ -389,7 +404,7 @@ async function handleStripePayment(cartId) {
+   }).then((res) => res.json());
+ 
+   if (!paymentMethodResponse.data) {
+-    displayStripeError('Failed to set the payment method.');
++    await displayStripeError('Failed to set the payment method.');
+     return false;
+   }
+ 
+@@ -419,7 +434,7 @@ function renderStripePaymentMethod(ctx) {
+       }, { eager: true });
+     } catch (error) {
+       $stripeContainer.classList.remove('stripe-elements-loading');
+-      displayStripeError('Unable to load payment form. Please refresh and try again.', 'stripe-elements-container');
++      await displayStripeError('Unable to load payment form. Please refresh and try again.', 'stripe-elements-container');
+       console.error('Failed to initialize Stripe payment form:', error);
+     }
+   });

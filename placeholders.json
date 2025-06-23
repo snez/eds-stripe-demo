@@ -1,0 +1,8 @@
+{
+  "data": [
+    {
+      "Key": "Custom.StripePayment.genericError",
+      "Value": "There was an error processing your payment. Please try again."
+    }
+  ]
+}
