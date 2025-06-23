@@ -103,10 +103,7 @@ Stripe by making some simple adjustments.
 First, import the Stripe block's javascript component:
 
 ```javascript
-import {
-  renderStripePaymentMethod,
-  handleStripePayment,
-} from '../stripe-payment/stripe-payment.js';
+import * as stripe from '../stripe-payment/stripe-payment.js';
 ```
 
 Next, find the payment methods renderer and add a slot for the `oope_stripe` payment method code:
@@ -117,7 +114,7 @@ CheckoutProvider.render(PaymentMethods, {
     Methods: {
       ...
       oope_stripe: {
-        render: renderStripePaymentMethod,
+        render: stripe.renderStripePaymentMethod,
       },
       ...
     },
@@ -132,7 +129,7 @@ CheckoutProvider.render(PlaceOrder, {
   handlePlaceOrder: async ({ cartId, code }) => {
     ...
     if (code === 'oope_stripe') {
-      if (!await handleStripePayment(cartId)) {
+      if (!await stripe.handleStripePayment(cartId)) {
         return;
       }
     }
