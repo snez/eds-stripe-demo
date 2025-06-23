@@ -15,7 +15,6 @@ import * as orderApi from '@dropins/storefront-order/api.js';
 // Payment Services
 import { PaymentMethodCode } from '@dropins/storefront-payment-services/api.js';
 
-import { getConfigValue } from '../../scripts/configs.js';
 import { loadCSS } from '../../scripts/aem.js';
 
 /**
@@ -361,34 +360,15 @@ async function handleStripePayment(cartId) {
     return false;
   }
 
-  // ✅ Set Payment Method in Adobe Commerce
-  const setPaymentMethodMutation = `
-    mutation SetPaymentMethod($cartId: String!, $clientSecret: String!) {
-      setPaymentMethodOnCart(input: {
-        cart_id: $cartId,
-        payment_method: {
-          code: "oope_stripe",
-          additional_data: [
-            { key: "client_secret", value: $clientSecret }
-          ]
-        }
-      }) {
-        cart { id }
-      }
-    }
-  `;
+  // Set Payment Method in Adobe Commerce
+  const paymentMethodResponse = await checkoutApi.setPaymentMethod({
+    code: 'oope_stripe',
+    additional_data: [
+      { key: 'client_secret', value: clientSecret },
+    ],
+  });
 
-  const commerceCoreEndpoint = await getConfigValue('commerce-core-endpoint');
-  const paymentMethodResponse = await fetch(commerceCoreEndpoint, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      query: setPaymentMethodMutation,
-      variables: { cartId, clientSecret },
-    }),
-  }).then((res) => res.json());
-
-  if (!paymentMethodResponse.data) {
+  if (!paymentMethodResponse) {
     displayStripeError('Failed to set the payment method.');
     return false;
   }
