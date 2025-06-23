@@ -324,8 +324,6 @@ async function handleStripePayment(cartId) {
     return false;
   }
 
-  const commerceCoreEndpoint = getConfigValue('commerce-core-endpoint');
-
   if (!stripe || !elements) {
     displayStripeError('Stripe payment is not properly initialized. Please refresh and try again.');
     return false;
@@ -380,6 +378,7 @@ async function handleStripePayment(cartId) {
     }
   `;
 
+  const commerceCoreEndpoint = getConfigValue('commerce-core-endpoint');
   const paymentMethodResponse = await fetch(commerceCoreEndpoint, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
