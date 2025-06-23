@@ -378,7 +378,7 @@ async function handleStripePayment(cartId) {
     }
   `;
 
-  const commerceCoreEndpoint = getConfigValue('commerce-core-endpoint');
+  const commerceCoreEndpoint = await getConfigValue('commerce-core-endpoint');
   const paymentMethodResponse = await fetch(commerceCoreEndpoint, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
