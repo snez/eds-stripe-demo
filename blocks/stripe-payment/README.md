@@ -105,7 +105,6 @@ First, import the Stripe drop-in:
 import {
   renderStripePaymentMethod,
   handleStripePayment,
-  validateStripePayment,
 } from '../stripe-payment/stripe-payment.js';
 ```
 
@@ -115,9 +114,11 @@ Next, find the payment methods renderer and add a slot for the `oope_stripe` pay
 CheckoutProvider.render(PaymentMethods, {
   slots: {
     Methods: {
+      ...
       oope_stripe: {
         render: renderStripePaymentMethod,
       },
+      ...
     },
   },
 })
@@ -128,10 +129,13 @@ Finally, extend your `handlePlaceOrder` method to call the Stripe drop-in method
 ```javascript
 CheckoutProvider.render(PlaceOrder, {
   handlePlaceOrder: async ({ cartId, code }) => {
+    ...
     if (code === 'oope_stripe') {
-      if (!validateStripePayment()) { return; }
-      await handleStripePayment(cartId);
+      if (!await handleStripePayment(cartId)) {
+        return;
+      }
     }
+    ...
     await orderApi.placeOrder(cartId);
   },
 })

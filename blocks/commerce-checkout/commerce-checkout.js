@@ -70,7 +70,7 @@ import { getUserTokenCookie } from '../../scripts/initializers/index.js';
 import createModal from '../modal/modal.js';
 
 // Scripts
-import { renderStripePaymentMethod, handleStripePayment, validateStripePayment } from '../stripe-payment/stripe-payment.js';
+import { renderStripePaymentMethod, handleStripePayment } from '../stripe-payment/stripe-payment.js';
 
 import {
   estimateShippingCost,
@@ -458,8 +458,9 @@ export default async function decorate(block) {
             // Submit Payment Services credit card form
             await creditCardFormRef.current.submit();
           } else if (code === 'oope_stripe') {
-            if (!validateStripePayment()) { return; }
-            await handleStripePayment(cartId);
+            if (!await handleStripePayment(cartId)) {
+              return;
+            }
           }
           // Place order
           await orderApi.placeOrder(cartId);

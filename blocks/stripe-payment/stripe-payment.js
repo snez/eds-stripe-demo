@@ -316,26 +316,33 @@ async function mountPaymentDropin(mountId) {
 
 // Handle Stripe payment processing during order placement
 async function handleStripePayment(cartId) {
-  const commerceCoreEndpoint = getConfigValue('commerce-core-endpoint');
+  // Clear any previous errors
+  clearStripeError();
 
-  clearStripeError(); // Clear any previous errors
+  if (!validateStripePayment()) {
+    displayStripeError('Please complete your payment details');
+    return false;
+  }
+
+  const commerceCoreEndpoint = getConfigValue('commerce-core-endpoint');
 
   if (!stripe || !elements) {
     displayStripeError('Stripe payment is not properly initialized. Please refresh and try again.');
-    throw new Error('Stripe payment is not properly initialized');
+    return false;
   }
 
   try {
     await elements.submit();
   } catch (elemSubmitError) {
-    displayStripeError('Error validating payment form. Please check your payment details.');
-    throw new Error('Error validating payment form');
+    const errorMessage = elemSubmitError?.message || 'Unknown error submitting payment form';
+    displayStripeError(errorMessage);
+    return false;
   }
 
   const paymentIntentData = await startPayment(cartData, checkoutData);
   if (!paymentIntentData?.client_secret) {
     displayStripeError('Unable to create payment session. Please try again.');
-    throw new Error('Unable to create payment session');
+    return false;
   }
 
   const clientSecret = paymentIntentData.client_secret;
@@ -353,7 +360,7 @@ async function handleStripePayment(cartId) {
 
   if (error) {
     displayStripeError(`Payment failed: ${error.message}`);
-    throw new Error(`Payment failed: ${error.message}`);
+    return false;
   }
 
   // ✅ Set Payment Method in Adobe Commerce
@@ -383,9 +390,11 @@ async function handleStripePayment(cartId) {
   }).then((res) => res.json());
 
   if (!paymentMethodResponse.data) {
-    displayStripeError('Failed to set payment method. Please refresh and try again.');
-    throw new Error('Failed to set payment method');
+    displayStripeError('Failed to set the payment method.');
+    return false;
   }
+
+  return true;
 }
 
 // Render function for the Stripe payment method slot
@@ -473,11 +482,9 @@ function validateStripePayment() {
   }
 
   if (!paymentFormComplete) {
-    displayStripeError('Please complete your payment details');
     return false;
   }
 
-  clearStripeError();
   return true;
 }
 
