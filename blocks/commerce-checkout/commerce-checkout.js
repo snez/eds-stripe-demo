@@ -70,7 +70,7 @@ import { getUserTokenCookie } from '../../scripts/initializers/index.js';
 import createModal from '../modal/modal.js';
 
 // Scripts
-import { renderStripePaymentMethod, handleStripePayment } from '../stripe-payment/stripe-payment.js';
+import * as stripe from '../stripe-payment/stripe-payment.js';
 
 import {
   estimateShippingCost,
@@ -328,7 +328,7 @@ export default async function decorate(block) {
             },
           },
           oope_stripe: {
-            render: renderStripePaymentMethod,
+            render: stripe.renderStripePaymentMethod,
           },
           [PaymentMethodCode.SMART_BUTTONS]: {
             enabled: false,
@@ -458,7 +458,7 @@ export default async function decorate(block) {
             // Submit Payment Services credit card form
             await creditCardFormRef.current.submit();
           } else if (code === 'oope_stripe') {
-            if (!await handleStripePayment(cartId)) {
+            if (!await stripe.handleStripePayment(cartId)) {
               return;
             }
           }
