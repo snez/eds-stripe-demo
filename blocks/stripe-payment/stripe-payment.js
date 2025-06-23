@@ -356,7 +356,7 @@ async function handleStripePayment(cartId) {
   });
 
   if (error) {
-    displayStripeError(`Payment failed: ${error.message}`);
+    displayStripeError(error.message || 'An error occurred during payment confirmation.');
     return false;
   }
 
