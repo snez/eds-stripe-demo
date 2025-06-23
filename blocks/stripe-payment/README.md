@@ -1,10 +1,11 @@
-# Stripe Payment Drop-in
+# Stripe EDS Block
 
-A Stripe payment integration for Adobe EDS storefronts that automatically handles payment processing in checkout flows.
+An injectable EDS block by Stripe that provides encapsulated, reusable payment functionality, such as
+rendering the payment form, processing payments and handling payment errors.
 
 ## Installation and usage
 
-### Add the drop-in to your EDS storefront
+### Add the block to your EDS storefront
 
 If you have not set up your EDS storefront yet,
 - [See an overview](https://experienceleague.adobe.com/developer/commerce/storefront/get-started/) of the EDS storefront architecture.
@@ -71,7 +72,7 @@ overrideGQLOperations([
 2. Build the new schema by running `yarn install`. If successful, the new fragments will be added
    inside `scripts/__dropins__/storefront-checkout/fragments.js`.
 
-3. The new data in the updated schema must be allowed through the checkout drop-in's data transformer.
+3. The new data in the updated schema must be allowed through the checkout's data transformer.
    Edit your `scripts/initializers/checkout.js` to allow the data through the transformer.
 
 ```js
@@ -93,13 +94,13 @@ await initializeDropin(async () => {
 })();
 ```
 
-### Import the drop-in in your checkout block:
+### Integrate the Stripe EDS block into your commerce-checkout block:
 
-Commerce EDS storefront uses the `commerce-checkout` drop-in which is located under
-`blocks/commerce-checkout/commerce-checkout.js`. You can integrate the checkout with
+A boilerplate Commerce EDS storefront will use the `commerce-checkout` block which is located under
+`blocks/commerce-checkout/commerce-checkout.js`. You can integrate this with
 Stripe by making some simple adjustments.
 
-First, import the Stripe drop-in:
+First, import the Stripe block's javascript component:
 
 ```javascript
 import {

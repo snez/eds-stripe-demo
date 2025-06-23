@@ -18,8 +18,10 @@ import { PaymentMethodCode } from '@dropins/storefront-payment-services/api.js';
 import { loadCSS } from '../../scripts/aem.js';
 
 /**
- * Stripe Payment Drop-in
- * Handles Stripe payment integration for Adobe Commerce EDS checkout
+ * Stripe Payment Block
+ *
+ * This block integrates Stripe payment processing into the Adobe Commerce EDS checkout flow.
+ * It dynamically loads Stripe.js, initializes the payment form, and handles payment processing.
  */
 
 // Load the CSS for this block
@@ -215,7 +217,7 @@ function updateStripeBillingDetails() {
   }
 }
 
-async function mountPaymentDropin(mountId) {
+async function mountPaymentForm(mountId) {
   let stripePublishableKey;
 
   try {
@@ -395,7 +397,7 @@ function renderStripePaymentMethod(ctx) {
 
       events.on('checkout/initialized', (data) => {
         checkoutData = data;
-        mountPaymentDropin('#stripe-elements-container');
+        mountPaymentForm('#stripe-elements-container');
       }, { eager: true });
     } catch (error) {
       $stripeContainer.classList.remove('stripe-elements-loading');
@@ -405,7 +407,7 @@ function renderStripePaymentMethod(ctx) {
   });
 }
 
-// Initialize the Stripe payment drop-in
+// Initialize the Stripe SDK
 function initializeStripePayment() {
   // Update billing details if stripe payment is already initialized
   if (paymentElement) {
@@ -469,7 +471,5 @@ function validateStripePayment() {
 
 // Default export for block initialization (if used as a block)
 export default function decorate(block) {
-  // This drop-in doesn't need its own block decoration
-  // It's used as a service by other blocks
-  // Initialization is handled by the checkout/initialized event listener
+
 }
