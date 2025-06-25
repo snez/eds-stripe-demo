@@ -218,8 +218,7 @@ function updateStripeBillingDetails() {
 }
 
 async function mountPaymentForm(mountId) {
-  let stripePublishableKey;
-  let stripeOptions;
+  let initParams;
 
   try {
     // Ensure Stripe.js is loaded before continuing
@@ -250,9 +249,7 @@ async function mountPaymentForm(mountId) {
       throw new Error(`Failed to load Stripe init params: ${stripeInitParams.statusText}`);
     }
 
-    const stripeData = await stripeInitParams.json();
-    stripePublishableKey = stripeData.publishableKey;
-    stripeOptions = stripeData.options || {};
+    initParams = await stripeInitParams.json();
   } catch (error) {
     console.error('Error fetching Stripe key:', error);
     // Display the error using our helper function
@@ -262,7 +259,8 @@ async function mountPaymentForm(mountId) {
   }
 
   try {
-    stripe = Stripe(stripePublishableKey, stripeOptions);
+    stripe = Stripe(initParams.publishableKey, initParams.options);
+    stripe.registerAppInfo(initParams.appInfo);
     const cartTotal = Math.round(Number(cartData?.total?.includingTax?.value) * 100);
     const cartCurrency = cartData?.total?.includingTax?.currency?.toLowerCase();
 
