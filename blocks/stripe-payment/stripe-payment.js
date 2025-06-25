@@ -218,7 +218,7 @@ function updateStripeBillingDetails() {
 }
 
 async function mountPaymentForm(mountId) {
-  let stripePublishableKey;
+  let stripePublishableKey, stripeOptions;
 
   try {
     // Ensure Stripe.js is loaded before continuing
@@ -237,22 +237,21 @@ async function mountPaymentForm(mountId) {
     // eslint-disable-next-line max-len
     const paymentConfig = JSON.parse(stripePaymentMethod.oope_payment_method_config.backend_integration_url);
 
-    if (!paymentConfig.getPublishableKeyUrl) {
-      console.error('getPublishableKeyUrl is missing in the configuration.');
-      throw new Error('Stripe public key configuration is invalid.');
+    if (!paymentConfig.getInitParamsUrl) {
+      console.error('getInitParamsUrl is missing in the configuration.');
+      throw new Error('Stripe init params URL is invalid.');
     }
 
-    const runtimeGetPublishableKeyUrl = paymentConfig.getPublishableKeyUrl;
+    // 🔥 Fetch the Stripe Init Params
+    const stripeInitParams = await fetch(paymentConfig.getInitParamsUrl);
 
-    // 🔥 Fetch the Stripe Public Key
-    const stripeKeys = await fetch(runtimeGetPublishableKeyUrl);
-
-    if (!stripeKeys.ok) {
-      throw new Error(`Failed to load Stripe key: ${stripeKeys.statusText}`);
+    if (!stripeInitParams.ok) {
+      throw new Error(`Failed to load Stripe init params: ${stripeInitParams.statusText}`);
     }
 
-    const stripeData = await stripeKeys.json();
+    const stripeData = await stripeInitParams.json();
     stripePublishableKey = stripeData.publishableKey;
+    stripeOptions = stripeData.options || {};
   } catch (error) {
     console.error('Error fetching Stripe key:', error);
     // Display the error using our helper function
@@ -262,7 +261,7 @@ async function mountPaymentForm(mountId) {
   }
 
   try {
-    stripe = Stripe(stripePublishableKey);
+    stripe = Stripe(stripePublishableKey, stripeOptions);
     const cartTotal = Math.round(Number(cartData?.total?.includingTax?.value) * 100);
     const cartCurrency = cartData?.total?.includingTax?.currency?.toLowerCase();
 

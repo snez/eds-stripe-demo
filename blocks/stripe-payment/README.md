@@ -20,7 +20,7 @@ If you have not set up your EDS storefront yet,
   npm start
   ```
 
-With your EDS storefront set up, copy the `stripe-payment` folder from the app into your EDS project's `blocks/stripe-payment/` directory.
+With your EDS storefront set up, copy the `blocks/stripe-payment/` folder from the app into your EDS project's `blocks/stripe-payment/` directory.
 
 ### Extend the OOPE GraphQL Schema
 
