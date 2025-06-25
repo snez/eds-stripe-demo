@@ -218,7 +218,8 @@ function updateStripeBillingDetails() {
 }
 
 async function mountPaymentForm(mountId) {
-  let stripePublishableKey, stripeOptions;
+  let stripePublishableKey;
+  let stripeOptions;
 
   try {
     // Ensure Stripe.js is loaded before continuing
