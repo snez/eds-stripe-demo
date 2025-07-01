@@ -124,7 +124,7 @@ async function createPaymentIntent(endpoint, request) {
 
 // Function to start payment flow when an OOPE method is selected
 async function startPayment(cartDataParam, checkoutDataParam) {
-  // ✅ Locate the "oope_stripe" payment method
+  // Locate the "oope_stripe" payment method
   const stripePaymentMethod = checkoutDataParam.availablePaymentMethods.find(
     (method) => method.code === 'oope_stripe',
   );
@@ -156,13 +156,11 @@ async function startPayment(cartDataParam, checkoutDataParam) {
     requestBody,
   );
 
-  if (!beginCreatePaymentIntent || !beginCreatePaymentIntent.pi_id) {
+  if (!beginCreatePaymentIntent || !beginCreatePaymentIntent.client_secret) {
     displayStripeError('Payment error: Unable to create Stripe session.');
-    return { pi_id: null, payment_method: null, client_secret: null };
+    return { client_secret: null };
   }
   return {
-    pi_id: beginCreatePaymentIntent.pi_id,
-    payment_method: beginCreatePaymentIntent.payment_method,
     client_secret: beginCreatePaymentIntent.client_secret,
   };
 }
@@ -224,7 +222,7 @@ async function mountPaymentForm(mountId) {
     // Ensure Stripe.js is loaded before continuing
     await loadStripeJs();
 
-    // 🔥 Retrieve Stripe config dynamically
+    // Retrieve Stripe config dynamically
     const stripePaymentMethod = checkoutData.availablePaymentMethods.find(
       (method) => method.code === 'oope_stripe',
     );
@@ -233,7 +231,7 @@ async function mountPaymentForm(mountId) {
       console.error('Stripe payment method configuration is missing.');
       throw new Error('Stripe payment method is not available.');
     }
-    // 🔥 Parse the JSON config to get URLs
+    // Parse the JSON config to get URLs
     // eslint-disable-next-line max-len
     const paymentConfig = JSON.parse(stripePaymentMethod.oope_payment_method_config.backend_integration_url);
 
@@ -242,7 +240,7 @@ async function mountPaymentForm(mountId) {
       throw new Error('Stripe init params URL is invalid.');
     }
 
-    // 🔥 Fetch the Stripe Init Params
+    // Fetch the Stripe Init Params
     const stripeInitParams = await fetch(paymentConfig.getInitParamsUrl);
 
     if (!stripeInitParams.ok) {
@@ -264,14 +262,14 @@ async function mountPaymentForm(mountId) {
     const cartTotal = Math.round(Number(cartData?.total?.includingTax?.value) * 100);
     const cartCurrency = cartData?.total?.includingTax?.currency?.toLowerCase();
 
-    // 🔥 Dynamically set billing details from checkoutData
+    // Dynamically set billing details from checkoutData
     const billingAddress = checkoutData?.billingAddress || {};
     const shippingAddress = checkoutData?.shippingAddress || {};
     const isSameAsShipping = checkoutData?.isBillingSameAsShipping;
 
     const selectedBillingAddress = isSameAsShipping ? shippingAddress : billingAddress;
 
-    // ✅ Construct billing details for Stripe
+    // Construct billing details for Stripe
     const billingDetails = getCurrentBillingDetails;
 
     // Initialize Stripe elements with billing details
@@ -279,10 +277,7 @@ async function mountPaymentForm(mountId) {
       mode: 'payment',
       amount: cartTotal,
       currency: cartCurrency,
-      paymentMethodTypes: ['card', 'link'],
-      defaultValues: {
-        billingDetails,
-      },
+      paymentMethodTypes: ['card', 'link']
     });
 
     // Make sure the loading container is removed before mounting
